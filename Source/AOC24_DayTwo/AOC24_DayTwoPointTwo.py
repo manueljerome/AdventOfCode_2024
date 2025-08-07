@@ -1,0 +1,59 @@
+def main():
+    with open(r"C:\Users\Emmanuel\Documents\PythonCode\AdventOfCode_2024\Source\AOC24_DayTwo\puzzle_input.txt", "r", encoding="utf-8") as puzzle_input:
+        number_of_safe_reports = 0
+        while True:
+            puzzle_list = puzzle_input.readline()
+            if not puzzle_list:
+                break
+            puzzle_list = puzzle_list.strip().split()
+            #print(puzzle_list)
+            if(check_safety(puzzle_list)):
+                number_of_safe_reports += 1
+        print(number_of_safe_reports)
+
+def check_safety(puzzle_list=None):
+    levels = list(map(int, puzzle_list))
+    safety_count = 0
+    safety_count_max =1
+    if (levels == sorted(levels) or levels == sorted(list(map(int, levels)), reverse=True)):
+
+        previous_int = int(puzzle_list[0])
+        if any(i == 0 for i in puzzle_list):
+            return False
+        
+        for i in range(1, len(puzzle_list)):
+            if( abs(int(puzzle_list[i]) - previous_int) > 3 or  abs(int(puzzle_list[i]) - previous_int) < 1):
+                safety_count += 1
+
+            previous_int = int(puzzle_list[i])
+        print(puzzle_list)
+
+    else:
+        previous_int = int(levels[0])
+        
+        for i in range(1, len(levels)):
+            check_list = levels
+            check_list.pop(i)
+            if (sorted(check_list)):
+                print(check_list)
+                print(levels)
+                print("Compare")
+                previous_int = int(puzzle_list[0])
+                if any(i == 0 for i in puzzle_list):
+                    return False
+        
+        for i in range(1, len(puzzle_list)):
+            if( abs(int(puzzle_list[i]) - previous_int) > 3 or  abs(int(puzzle_list[i]) - previous_int) < 1):
+                safety_count += 1
+
+            previous_int = int(puzzle_list[i])
+        print(puzzle_list)
+    if(safety_count <= 1):
+        return True
+        
+ 
+
+        
+
+if __name__ == "__main__":
+    main()
