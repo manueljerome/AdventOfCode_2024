@@ -1,5 +1,8 @@
+
+#"C:\Users\Emmanuel\Documents\PythonCode\AdventOfCode_2024\Source\AOC24_DayTwo\puzzle_input.txt"
+#"/home/tarantula/Documents/AdventOfCodeRepo/AdventOfCode_2024/Source/AOC24_DayTwo/puzzle_input.txt
 def main():
-    with open(r"/home/tarantula/Documents/AdventOfCodeRepo/AdventOfCode_2024/Source/AOC24_DayTwo/puzzle_input.txt", "r", encoding="utf-8") as puzzle_input:
+    with open(r"C:\Users\Emmanuel\Documents\PythonCode\AdventOfCode_2024\Source\AOC24_DayTwo\puzzle_input.txt", "r", encoding="utf-8") as puzzle_input:
         number_of_safe_reports = 0
         while True:
             puzzle_list = puzzle_input.readline()
@@ -20,25 +23,25 @@ def check_safety(puzzle_list: list[str]) -> bool:
     safety_count_max =1
     if (levels == sorted(levels) or levels == sorted(levels, reverse=True)):
         duplicates = find_duplicates(levels)
-        if not duplicates:
+        if len(duplicates) == 0:
             if(check_sorted_list_is_safe(levels)):
-                print (levels)
-                print("needs no modification")
+                #print (levels)
+                #print("needs no modification")
                 return True
             else:
-                for i in levels:
+                for i in range(len(levels)):
                     result = remove_copy_list_item(i, levels)
-                    if(check_sorted_list_is_safe(levels)):
-                        print(result)
-                        print("removing an item makes it self")
+                    if(check_sorted_list_is_safe(result)):
+                        #print(levels)
+                        #print("removing an item makes it safe")
                         return True
                     else: return False
         else:
             for i in range(len(levels)):
                     result = remove_copy_list_item(i, levels)
-                    if(check_sorted_list_is_safe(levels)):
-                        print(result)
-                        print("duplicated but is safe after reomving one level")
+                    if(check_sorted_list_is_safe(result)):
+                        #print(levels)
+                        #print("duplicated but is safe after removing one level")
                         return True
                     else: return False
     else:
@@ -50,6 +53,7 @@ def remove_copy_list_item(index: int, unsafeList: list[int]) -> list[int]:
     """
     Remove duplicate value or value that might lead to unsafe condition from list
     """
+
     copy_list = unsafeList
     copy_list.pop(index)
     return copy_list
@@ -65,25 +69,29 @@ def find_duplicates(input_list: list[int]) -> dict[int, int]:
         for j in range(len(input_list)):
             if(input_list[i] == input_list[j]):
                 _count += 1
+                
         
         if (_count > 1):   
-            entry = {i : _count}
-            print(entry)
-            duplicate_dict.update(entry)
+            entry = {input_list[i] : _count}
+            duplicate_dict.update(entry)  
+            print(input_list)
+            #print(entry)
     
      
-    return duplicate_dict or None
+    return duplicate_dict
         
 def check_sorted_list_is_safe(puzzle_list: list[int]) -> bool:
     """
     """
-    previous_int = int(puzzle_list[0])
+    previous_int = puzzle_list[0]
     if any(i == 0 for i in puzzle_list):
         return False
     
     for i in range(1, len(puzzle_list)):
-            if( abs(int(puzzle_list[i]) - previous_int) > 3 or  abs(int(puzzle_list[i]) - previous_int) < 1):
-                return True
+            if(abs(int(puzzle_list[i]) - previous_int) > 3 or  abs(int(puzzle_list[i]) - previous_int) < 1):
+                return False
+            previous_int = puzzle_list[i]
+    return True
 
 
 
