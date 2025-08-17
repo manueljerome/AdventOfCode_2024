@@ -2,7 +2,7 @@
 #"C:\Users\Emmanuel\Documents\PythonCode\AdventOfCode_2024\Source\AOC24_DayTwo\puzzle_input.txt"
 #"/home/tarantula/Documents/AdventOfCodeRepo/AdventOfCode_2024/Source/AOC24_DayTwo/puzzle_input.txt
 def main():
-    with open(r"C:\Users\Emmanuel\Documents\PythonCode\AdventOfCode_2024\Source\AOC24_DayTwo\puzzle_input.txt", "r", encoding="utf-8") as puzzle_input:
+    with open(r"/home/tarantula/Documents/AdventOfCodeRepo/AdventOfCode_2024/Source/AOC24_DayTwo/puzzle_input.txt", "r", encoding="utf-8") as puzzle_input:
         number_of_safe_reports = 0
         while True:
             puzzle_list = puzzle_input.readline()
@@ -18,11 +18,22 @@ def main():
 def check_safety(puzzle_list: list[str]) -> bool:
     """
     """
+
+    from collections import Counter
+    from itertools import chain
+
     levels = list(map(int, puzzle_list))
     safety_count = 0
     safety_count_max =1
+    s = open(r"/home/tarantula/Documents/AdventOfCodeRepo/AdventOfCode_2024/Source/AOC24_DayTwo/puzzle_input.txt", "r", encoding="utf-8")
+    s_list = s.read()
     if (levels == sorted(levels) or levels == sorted(levels, reverse=True)):
         duplicates = find_duplicates(levels)
+        counts = Counter(chain.from_iterable(s))   # flatten then count
+        print({k: v for k, v in counts.items() if v > 1})
+
+
+        #print(duplicates)
         if len(duplicates) == 0:
             if(check_sorted_list_is_safe(levels)):
                 #print (levels)
@@ -45,7 +56,13 @@ def check_safety(puzzle_list: list[str]) -> bool:
                         return True
                     else: return False
     else:
-        return False
+        for i in range(len(levels)):
+                    result = remove_copy_list_item(i, levels)
+                    if(check_sorted_list_is_safe(result)):
+                        #print(levels)
+                        #print("removing an item makes it safe")
+                        return True
+                    else: return False
 
         
  
@@ -58,27 +75,34 @@ def remove_copy_list_item(index: int, unsafeList: list[int]) -> list[int]:
     copy_list.pop(index)
     return copy_list
 
-def find_duplicates(input_list: list[int]) -> dict[int, int]:
+def find_duplicates(input_list: list[int]) -> list[int]:
     """
     find out if list contains duplicate of a value and return the integer that's duplicated alongside its duplicate indexes
     """
-    duplicate_dict = {}
-    for i in range((len(input_list))):
-        _count = 0
-        #if(not input_list[i + 1]):   break
-        for j in range(len(input_list)):
-            if(input_list[i] == input_list[j]):
-                _count += 1
+    from collections import Counter
+
+    counts = Counter(input_list)
+    duplicate_dict = {k: v for k, v in counts.items() if v > 1}
+    #print (counts)
+    duplicated_numbers_list = list(duplicate_dict)
+    
+    #print(duplicate_dict)
+    # for i in range((len(input_list))):
+    #     _count = 0
+    #     if input_list[i] in duplicated_numbers_list: continue
+    #     for j in range(len(input_list)):
+    #         if(input_list[i] == input_list[j]):
+    #             _count += 1
+                
                 
         
-        if (_count > 1):   
-            entry = {input_list[i] : _count}
-            duplicate_dict.update(entry)  
-            print(input_list)
-            #print(entry)
-    
-     
-    return duplicate_dict
+    #     if (_count > 1):  
+    #         duplicated_numbers_list.append(input_list[i]) 
+    #         #print (duplicated_numbers_list)
+    #         entry = {input_list[i] : _count}
+    #         duplicate_dict.update(entry) 
+    return duplicated_numbers_list
+        
         
 def check_sorted_list_is_safe(puzzle_list: list[int]) -> bool:
     """
