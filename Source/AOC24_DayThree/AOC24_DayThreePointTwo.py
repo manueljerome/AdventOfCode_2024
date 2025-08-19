@@ -2,7 +2,7 @@ from typing import Final
 import re
 from pathlib import Path
 
-#Final is not really necessary here since it's just my code, using it for muscle memory for when I work on production code. also, compiling regex for performance boost when calling multiple times(also for muscle memory)
+
 PATTERN: Final[re.Pattern[str]] = re.compile(r"mul\((\d+),(\d+)\)")
 def main() -> int:
     """
