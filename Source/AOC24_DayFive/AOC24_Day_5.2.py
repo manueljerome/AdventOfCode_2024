@@ -15,43 +15,52 @@ def main():
     sum_of_middle_numbers = get_sum_of_middle_numbers(ordered_updates)
     print(sum_of_middle_numbers)
 
-def fix_misordered_updates(_grouped_updates: dict[str:list[str]], update_path: Path) -> list[list[str]]:
+
+from collections import deque
+
+def fix_misordered_updates(successors: dict[str, set[str]], update_path: Path) -> list[list[str]]:
     """
-    Read updates from file and reorder any that violate the rules.
-    Returns only the updates that were corrected.
+    Reorder updates using topological sort.
+
+    For each update, build the subgraph of ordering rules relevant to the pages 
+    in that update and apply Kahn's algorithm to produce a valid sequence.Pages 
+    are ordered so that all constraints X|Y (X must appear before Y) are satisfied. 
+    Ties between unconstrained pages are broken using their original left-to-right 
+    order to keep the result stable.
+
+    Returns only the updates that were misordered and had to be corrected.
     """
-    validated_updates = []
-    update_list = update_path.read_text(encoding = "utf-8").splitlines()
-    update_list = [[t.strip() for t in r.split(",")] for r in update_list]
-    
-    for update in update_list:
-        ok = True
-        
-        for page_idx in range(len(update)): 
-            for i in range(len(update)):
-                if i == page_idx : continue
 
-                next_page = update[i]
-                successors_list = _grouped_updates.get(update[page_idx], [])
+    fixed = []
+    lines = update_path.read_text(encoding="utf-8").splitlines()
+    updates = [[t.strip() for t in ln.split(",")] for ln in lines if ln.strip()]
 
-                if ((next_page in successors_list and i > page_idx) or next_page not in successors_list and i < page_idx):
-                    continue
-                b_pg_index = update.index(update[i])
-                a_pg_index = update.index(update[page_idx])
+    for original in updates:
+        nodes = set(original)
+        indeg = {n: 0 for n in nodes}
+        adj = {n: set() for n in nodes}
+        for u in nodes:
+            for v in successors.get(u, ()):
+                if v in nodes and v not in adj[u]:
+                    adj[u].add(v); indeg[v] += 1
 
-                if(next_page in successors_list and i < page_idx):   
-                    ok = False
-                    before = update.pop(a_pg_index)
-                    update.insert(b_pg_index, before )
+        order_idx = {p: i for i, p in enumerate(original)}
+        q = sorted([n for n in nodes if indeg[n] == 0], key=order_idx.get)
+        result, dq = [], deque(q)
+        while dq:
+            u = dq.popleft()
+            result.append(u)
+            for v in sorted(adj[u], key=order_idx.get):
+                indeg[v] -= 1
+                if indeg[v] == 0:
+                    dq.append(v)
 
-                if(next_page not in successors_list and i > page_idx):
-                    ok = False
-                    before = update.pop(b_pg_index)
-                    update.insert(a_pg_index, before)
-                    
-        if ok == False:
-            validated_updates.append(update)
-    return validated_updates
+        if len(result) != len(original):
+            raise ValueError("Cycle in rules; cannot reorder.")
+        if result != original:
+            fixed.append(result)
+    return fixed
+
                
 def parse_rules(rules_path: Path) -> dict[str, list[str]]:
     """
@@ -86,3 +95,44 @@ def get_sum_of_middle_numbers(ordered_list: list[list[str]]) -> int:
 
 if __name__ == "__main__":
     main()
+
+
+#First Iteration of fix_misordered_updates
+#
+# def fix_misordered_updates(_grouped_updates: dict[str:list[str]], update_path: Path) -> list[list[str]]:
+#     """
+#     Read updates from file and reorder any that violate the rules.
+#     Returns only the updates that were corrected.
+#     """
+#     validated_updates = []
+#     update_list = update_path.read_text(encoding = "utf-8").splitlines()
+#     update_list = [[t.strip() for t in r.split(",")] for r in update_list]
+    
+#     for update in update_list:
+#         ok = True
+        
+#         for page_idx in range(len(update)): 
+#             for i in range(len(update)):
+#                 if i == page_idx : continue
+
+#                 next_page = update[i]
+#                 successors_list = _grouped_updates.get(update[page_idx], [])
+
+#                 if ((next_page in successors_list and i > page_idx) or next_page not in successors_list and i < page_idx):
+#                     continue
+#                 b_pg_index = update.index(update[i])
+#                 a_pg_index = update.index(update[page_idx])
+
+#                 if(next_page in successors_list and i < page_idx):   
+#                     ok = False
+#                     before = update.pop(a_pg_index)
+#                     update.insert(b_pg_index, before )
+
+#                 if(next_page not in successors_list and i > page_idx):
+#                     ok = False
+#                     before = update.pop(b_pg_index)
+#                     update.insert(a_pg_index, before)
+                    
+#         if ok == False:
+#             validated_updates.append(update)
+#     return validated_updates
